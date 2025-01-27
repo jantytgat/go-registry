@@ -34,3 +34,6 @@ output/
 vendor/
 # - Go workspace file
 go.work
+
+
+*.db
