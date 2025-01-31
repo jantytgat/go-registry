@@ -1,3 +1,3 @@
 SELECT *
-FROM environments
+FROM credentials
 WHERE tenant_id == ?
