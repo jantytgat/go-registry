@@ -1,3 +1,3 @@
 DELETE
 FROM tenants
-WHERE id == ?
+WHERE guid == ?

@@ -1,3 +1,3 @@
-INSERT INTO tenants (guid, name)
-VALUES (?, ?)
+INSERT INTO tenants (guid, name, organization_id)
+VALUES (?, ?, ?)
 RETURNING id
