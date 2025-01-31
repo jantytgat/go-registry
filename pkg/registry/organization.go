@@ -37,6 +37,54 @@ func AddOrganization(r *queryrepo.Repository, db *sql.DB, guid, name string) (Or
 	}, err
 }
 
+func DeleteOrganizationByGuid(r *queryrepo.Repository, db *sql.DB, guid string) (int64, error) {
+	var err error
+
+	var q *sql.Stmt
+	if q, err = r.DbPrepare(db, "organizations", "deleteByGuid"); err != nil {
+		return 0, err
+	}
+
+	var result sql.Result
+	if result, err = q.Exec(guid); err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
+
+func DeleteOrganizationById(r *queryrepo.Repository, db *sql.DB, id int64) (int64, error) {
+	var err error
+
+	var q *sql.Stmt
+	if q, err = r.DbPrepare(db, "organizations", "deleteById"); err != nil {
+		return 0, err
+	}
+
+	var result sql.Result
+	if result, err = q.Exec(id); err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
+
+func DeleteOrganizationByName(r *queryrepo.Repository, db *sql.DB, name string) (int64, error) {
+	var err error
+
+	var q *sql.Stmt
+	if q, err = r.DbPrepare(db, "organizations", "deleteByName"); err != nil {
+		return 0, err
+	}
+
+	var result sql.Result
+	if result, err = q.Exec(name); err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
+
 func GetOrganizationByGuid(r *queryrepo.Repository, db *sql.DB, guid string) (Organization, error) {
 	var err error
 
@@ -47,6 +95,18 @@ func GetOrganizationByGuid(r *queryrepo.Repository, db *sql.DB, guid string) (Or
 
 	var o Organization
 	return o, q.QueryRow(guid).Scan(&o.Id, &o.Guid, &o.Name)
+}
+
+func GetOrganizationById(r *queryrepo.Repository, db *sql.DB, id int64) (Organization, error) {
+	var err error
+
+	var q *sql.Stmt
+	if q, err = r.DbPrepare(db, "organizations", "getById"); err != nil {
+		return Organization{}, err
+	}
+
+	var o Organization
+	return o, q.QueryRow(id).Scan(&o.Id, &o.Guid, &o.Name)
 }
 
 func GetOrganizationByName(r *queryrepo.Repository, db *sql.DB, name string) (Organization, error) {
@@ -77,14 +137,14 @@ func ListOrganizations(r *queryrepo.Repository, db *sql.DB) ([]Organization, err
 	}
 	defer rows.Close()
 
-	var orgs []Organization
+	var organizations []Organization
 	for rows.Next() {
 		var o Organization
 		if err = rows.Scan(&o.Id, &o.Guid, &o.Name); err != nil {
 			fmt.Println("Error scanning listing organizations")
 			return nil, err
 		}
-		orgs = append(orgs, o)
+		organizations = append(organizations, o)
 	}
-	return orgs, nil
+	return organizations, nil
 }
