@@ -32,15 +32,18 @@ CREATE TABLE IF NOT EXISTS certificates
         CONSTRAINT p_id
             PRIMARY KEY AUTOINCREMENT,
     name             TEXT    NOT NULL,
-    certificate_type INTEGER NOT NULL
+    certificate_type_id INTEGER NOT NULL
         CONSTRAINT f_certificate_type_id
-            REFERENCES certificates_types (id),
-    management_type  INTEGER NOT NULL
+            REFERENCES certificates_types (id)
+            ON DELETE CASCADE,
+    management_type_id  INTEGER NOT NULL
         CONSTRAINT f_certificate_management_type_id
-            REFERENCES certificates_management_types,
+            REFERENCES certificates_management_types
+            ON DELETE CASCADE,
     tenant_id        INTEGER NOT NULL
         CONSTRAINT f_tenant_id
-            REFERENCES tenants (id),
+            REFERENCES tenants (id)
+            ON DELETE CASCADE,
 
     CONSTRAINT u_tenant_certificate_name
         UNIQUE (tenant_id, name)

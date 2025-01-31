@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS tenants
     name            TEXT    NOT NULL,
     organization_id INTEGER NOT NULL
         CONSTRAINT f_organization_id
-            REFERENCES organizations (id),
+            REFERENCES organizations (id)
+            ON DELETE CASCADE,
 
     CONSTRAINT u_tenant_name
         UNIQUE (organization_id, name)
@@ -52,7 +53,8 @@ CREATE TABLE IF NOT EXISTS environments
     name      TEXT    NOT NULL,
     tenant_id INTEGER NOT NULL
         CONSTRAINT f_tenant_id
-            REFERENCES tenants (id),
+            REFERENCES tenants (id)
+            ON DELETE CASCADE,
 
     CONSTRAINT u_environment_name
         UNIQUE (tenant_id, name)
@@ -85,7 +87,8 @@ CREATE TABLE IF NOT EXISTS credentials
     name      TEXT    NOT NULL,
     tenant_id INTEGER NOT NULL
         CONSTRAINT f_tenant_id
-            REFERENCES tenants (id),
+            REFERENCES tenants (id)
+            ON DELETE CASCADE,
 
     CONSTRAINT u_credential_name
         UNIQUE (tenant_id, name)
@@ -101,7 +104,9 @@ CREATE TABLE IF NOT EXISTS credential_fields
     value         TEXT    NOT NULL,
     credential_id INTEGER NOT NULL
         CONSTRAINT f_credential_id
-            REFERENCES credentials (id),
+            REFERENCES credentials (id)
+            ON DELETE CASCADE,
+
     CONSTRAINT u_credential_field_name
         UNIQUE (credential_id, name)
             ON CONFLICT FAIL
@@ -131,8 +136,8 @@ CREATE TABLE IF NOT EXISTS connections
             REFERENCES environments (id),
     connection_type_id INTEGER NOT NULL
         CONSTRAINT f_connection_type_id
-            REFERENCES connections_types (id),
-
+            REFERENCES connection_types (id)
+            ON DELETE CASCADE,
 
     CONSTRAINT u_connection_name
         UNIQUE (environment_id, name)
@@ -147,10 +152,13 @@ CREATE TABLE IF NOT EXISTS connection_credentials
     name          TEXT    NOT NULL,
     connection_id INTEGER NOT NULL
         CONSTRAINT f_connections_id
-            REFERENCES connections (id),
+            REFERENCES connections (id)
+            ON DELETE CASCADE,
+
     credential_id INTEGER NOT NULL
         CONSTRAINT f_credential_id
-            REFERENCES credentials (id),
+            REFERENCES credentials (id)
+            ON DELETE CASCADE,
 
     CONSTRAINT u_connection_credential
         UNIQUE (connection_id, credential_id)

@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS connections_netscaleradc
 (
     id                        INTEGER NOT NULL
         CONSTRAINT f_connection_id
-            REFERENCES connections (id),
+            REFERENCES connections (id)
+            ON DELETE CASCADE,
     management_address        TEXT,
     node_addresses            TEXT,
     connection_timeout        INTEGER,

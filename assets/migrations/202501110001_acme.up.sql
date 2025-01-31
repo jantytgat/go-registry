@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS certificates_acme_services
     url       TEXT    NOT NULL,
     tenant_id INTEGER NOT NULL
         CONSTRAINT f_tenant_id
-            REFERENCES tenants (id),
+            REFERENCES tenants (id)
+            ON DELETE CASCADE,
 
     CONSTRAINT u_name_tenant_id
         UNIQUE (tenant_id, name)
@@ -40,7 +41,8 @@ CREATE TABLE IF NOT EXISTS certificates_acme_users
     hmac      TEXT,
     tenant_id INTEGER NOT NULL
         CONSTRAINT f_tenant_id
-            REFERENCES tenants (id),
+            REFERENCES tenants (id)
+            ON DELETE CASCADE,
 
     CONSTRAINT u_name_tenant_id
         UNIQUE (tenant_id, name)

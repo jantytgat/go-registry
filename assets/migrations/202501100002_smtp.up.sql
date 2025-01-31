@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS connections_smtp_servers
     smtp_protocol_id INTEGER NOT NULL
         CONSTRAINT f_smtp_protocol_id
             REFERENCES connections_smtp_protocols (id)
+            ON DELETE RESTRICT
 );
 
 INSERT INTO connection_types (guid, name)
