@@ -48,7 +48,7 @@ func (r *Registry) DeleteEnvironmentByNameAndTenantId(ctx context.Context, name 
 	var err error
 	var s *sql.Stmt
 
-	if s, err = r.getStatement(ctx, EnvironmentsCollection, DeleteByName); err != nil {
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, DeleteByNameAndTenantId); err != nil {
 		return 0, err
 	}
 
@@ -64,7 +64,7 @@ func (r *Registry) DeleteEnvironmentByNameAndTenantName(ctx context.Context, nam
 	var err error
 	var s *sql.Stmt
 
-	if s, err = r.getStatement(ctx, EnvironmentsCollection, DeleteByName); err != nil {
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, DeleteByNameAndTenantNameAndOrganizationName); err != nil {
 		return 0, err
 	}
 
@@ -184,6 +184,31 @@ func (r *Registry) ListEnvironmentsByTenantId(ctx context.Context, id int64) ([]
 
 	var rows *sql.Rows
 	if rows, err = s.Query(id); err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var environments []Environment
+	for rows.Next() {
+		var e Environment
+		if err = rows.Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId); err != nil {
+			return nil, err
+		}
+		environments = append(environments, e)
+	}
+	return environments, nil
+}
+
+func (r *Registry) ListEnvironmentsByTenantNameAndOrganizationName(ctx context.Context, tenant, organization string) ([]Environment, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, ListByTenantNameAndOrganizationName); err != nil {
+		return nil, err
+	}
+
+	var rows *sql.Rows
+	if rows, err = s.Query(tenant, organization); err != nil {
 		return nil, err
 	}
 	defer rows.Close()
