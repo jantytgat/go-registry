@@ -1,5 +1,6 @@
 PRAGMA foreign_keys = on;
 
+-- ORGANIZATIONS
 CREATE TABLE IF NOT EXISTS organizations
 (
     id   INTEGER NOT NULL
@@ -18,6 +19,9 @@ CREATE TABLE IF NOT EXISTS organizations
 INSERT INTO organizations (guid, name)
 VALUES ('0', 'default');
 
+-- TENANTS
+-- -- DEPENDS ON
+-- -- -- organizations
 CREATE TABLE IF NOT EXISTS tenants
 (
     id              INTEGER NOT NULL
@@ -41,6 +45,9 @@ CREATE TABLE IF NOT EXISTS tenants
 INSERT INTO tenants (guid, name, organization_id)
 VALUES ('0', 'default', 1);
 
+-- ENVIRONMENTS
+-- -- DEPENDS ON
+-- -- -- tenants
 CREATE TABLE IF NOT EXISTS environments
 (
     id        INTEGER NOT NULL
@@ -75,6 +82,9 @@ SELECT t.id   as tenant_id,
 FROM environments e
          JOIN tenants t ON t.id = e.tenant_id;
 
+-- CREDENTIALS
+-- -- DEPENDS ON
+-- -- -- tenants
 CREATE TABLE IF NOT EXISTS credentials
 (
     id        INTEGER NOT NULL
@@ -95,6 +105,9 @@ CREATE TABLE IF NOT EXISTS credentials
             ON CONFLICT FAIL
 );
 
+-- CREDENTIAL FIELDS
+-- -- DEPENDS ON
+-- -- -- credentials
 CREATE TABLE IF NOT EXISTS credential_fields
 (
     id            INTEGER NOT NULL
