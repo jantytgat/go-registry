@@ -1,9 +1,8 @@
 package registry
 
 import (
+	"context"
 	"database/sql"
-
-	"github.com/jantytgat/go-sql-queryrepo/pkg/queryrepo"
 )
 
 type Environment struct {
@@ -13,16 +12,128 @@ type Environment struct {
 	TenantId int64
 }
 
-func AddEnvironment(r *queryrepo.Repository, db *sql.DB, guid, name string, tenantId int64) (Environment, error) {
+func (r *Registry) DeleteEnvironmentByGuid(ctx context.Context, guid string) (int64, error) {
 	var err error
+	var s *sql.Stmt
 
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "environments", "insert"); err != nil {
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, DeleteByGuid); err != nil {
+		return 0, err
+	}
+
+	var result sql.Result
+	if result, err = s.Exec(guid); err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
+
+func (r *Registry) DeleteEnvironmentById(ctx context.Context, id int64) (int64, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, DeleteById); err != nil {
+		return 0, err
+	}
+
+	var result sql.Result
+	if result, err = s.Exec(id); err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
+
+func (r *Registry) DeleteEnvironmentByNameAndTenantId(ctx context.Context, name string, id int64) (int64, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, DeleteByName); err != nil {
+		return 0, err
+	}
+
+	var result sql.Result
+	if result, err = s.Exec(name, id); err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
+
+func (r *Registry) DeleteEnvironmentByNameAndTenantName(ctx context.Context, name, tenantName, organizationName string) (int64, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, DeleteByName); err != nil {
+		return 0, err
+	}
+
+	var result sql.Result
+	if result, err = s.Exec(name, tenantName, organizationName); err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
+
+func (r *Registry) GetEnvironmentByGuid(ctx context.Context, guid string) (Environment, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, GetByGuid); err != nil {
+		return Environment{}, err
+	}
+
+	var e Environment
+	return e, s.QueryRow(guid).Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId)
+}
+
+func (r *Registry) GetEnvironmentById(ctx context.Context, id int64) (Environment, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, GetById); err != nil {
+		return Environment{}, err
+	}
+
+	var e Environment
+	return e, s.QueryRow(id).Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId)
+}
+
+func (r *Registry) GetEnvironmentByNameAndTenantId(ctx context.Context, name string, id int64) (Environment, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, GetByNameAndTenantId); err != nil {
+		return Environment{}, err
+	}
+
+	var e Environment
+	return e, s.QueryRow(name, id).Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId)
+}
+
+func (r *Registry) GetEnvironmentByNameAndTenantNameAndOrganizationName(ctx context.Context, name, tenant, organization string) (Environment, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, GetByNameAndTenantNameAndOrganizationName); err != nil {
+		return Environment{}, err
+	}
+
+	var e Environment
+	return e, s.QueryRow(name, tenant, organization).Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId)
+}
+
+func (r *Registry) InsertEnvironment(ctx context.Context, guid, name string, tenantId int64) (Environment, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, Insert); err != nil {
 		return Environment{}, err
 	}
 
 	var result sql.Result
-	if result, err = q.Exec(guid, name, tenantId); err != nil {
+	if result, err = s.Exec(guid, name, tenantId); err != nil {
 		return Environment{}, err
 	}
 
@@ -38,100 +149,16 @@ func AddEnvironment(r *queryrepo.Repository, db *sql.DB, guid, name string, tena
 	}, err
 }
 
-func DeleteEnvironmentByGuid(r *queryrepo.Repository, db *sql.DB, guid string) (int64, error) {
+func (r *Registry) ListEnvironments(ctx context.Context) ([]Environment, error) {
 	var err error
+	var s *sql.Stmt
 
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "environments", "deleteByGuid"); err != nil {
-		return 0, err
-	}
-
-	var result sql.Result
-	if result, err = q.Exec(guid); err != nil {
-		return 0, err
-	}
-
-	return result.RowsAffected()
-}
-
-func DeleteEnvironmentById(r *queryrepo.Repository, db *sql.DB, id int64) (int64, error) {
-	var err error
-
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "environments", "deleteById"); err != nil {
-		return 0, err
-	}
-
-	var result sql.Result
-	if result, err = q.Exec(id); err != nil {
-		return 0, err
-	}
-
-	return result.RowsAffected()
-}
-
-func DeleteEnvironmentByName(r *queryrepo.Repository, db *sql.DB, name string) (int64, error) {
-	var err error
-
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "environments", "deleteByName"); err != nil {
-		return 0, err
-	}
-
-	var result sql.Result
-	if result, err = q.Exec(name); err != nil {
-		return 0, err
-	}
-
-	return result.RowsAffected()
-}
-
-func GetEnvironmentByGuid(r *queryrepo.Repository, db *sql.DB, guid string) (Environment, error) {
-	var err error
-
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "environments", "getByGuid"); err != nil {
-		return Environment{}, err
-	}
-
-	var e Environment
-	return e, q.QueryRow(guid).Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId)
-}
-
-func GetEnvironmentById(r *queryrepo.Repository, db *sql.DB, id int64) (Environment, error) {
-	var err error
-
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "environments", "getById"); err != nil {
-		return Environment{}, err
-	}
-
-	var e Environment
-	return e, q.QueryRow(id).Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId)
-}
-
-func GetEnvironmentByName(r *queryrepo.Repository, db *sql.DB, name string) (Environment, error) {
-	var err error
-
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "environments", "getByName"); err != nil {
-		return Environment{}, err
-	}
-
-	var e Environment
-	return e, q.QueryRow(name).Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId)
-}
-
-func ListEnvironments(r *queryrepo.Repository, db *sql.DB) ([]Environment, error) {
-	var err error
-
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "environments", "list"); err != nil {
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, List); err != nil {
 		return nil, err
 	}
 
 	var rows *sql.Rows
-	if rows, err = q.Query(); err != nil {
+	if rows, err = s.Query(); err != nil {
 		return nil, err
 	}
 	defer rows.Close()
@@ -147,16 +174,16 @@ func ListEnvironments(r *queryrepo.Repository, db *sql.DB) ([]Environment, error
 	return environments, nil
 }
 
-func ListEnvironmentsByTenantId(r *queryrepo.Repository, db *sql.DB, id int64) ([]Environment, error) {
+func (r *Registry) ListEnvironmentsByTenantId(ctx context.Context, id int64) ([]Environment, error) {
 	var err error
+	var s *sql.Stmt
 
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "environments", "listByTenantId"); err != nil {
+	if s, err = r.getStatement(ctx, EnvironmentsCollection, ListByTenantId); err != nil {
 		return nil, err
 	}
 
 	var rows *sql.Rows
-	if rows, err = q.Query(id); err != nil {
+	if rows, err = s.Query(id); err != nil {
 		return nil, err
 	}
 	defer rows.Close()

@@ -1,9 +1,8 @@
 package registry
 
 import (
+	"context"
 	"database/sql"
-
-	"github.com/jantytgat/go-sql-queryrepo/pkg/queryrepo"
 )
 
 type CredentialField struct {
@@ -13,16 +12,60 @@ type CredentialField struct {
 	CredentialId int64
 }
 
-func AddCredentialField(r *queryrepo.Repository, db *sql.DB, name, value string, credentialId int64) (CredentialField, error) {
+func (r *Registry) DeleteCredentialFieldByCredentialId(ctx context.Context, id int64) (int64, error) {
 	var err error
+	var s *sql.Stmt
 
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "credentialFields", "insert"); err != nil {
+	if s, err = r.getStatement(ctx, CredentialFieldsCollection, DeleteByCredentialId); err != nil {
+		return 0, err
+	}
+
+	var result sql.Result
+	if result, err = s.Exec(id); err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
+
+func (r *Registry) DeleteCredentialFieldById(ctx context.Context, id int64) (int64, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, CredentialFieldsCollection, DeleteById); err != nil {
+		return 0, err
+	}
+
+	var result sql.Result
+	if result, err = s.Exec(id); err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
+
+func (r *Registry) GetCredentialFieldById(ctx context.Context, id int64) (CredentialField, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, CredentialFieldsCollection, GetById); err != nil {
+		return CredentialField{}, err
+	}
+
+	var e CredentialField
+	return e, s.QueryRow(id).Scan(&e.Id, &e.Name, &e.Value, &e.CredentialId)
+}
+
+func (r *Registry) InsertCredentialField(ctx context.Context, name, value string, credentialId int64) (CredentialField, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, CredentialFieldsCollection, Insert); err != nil {
 		return CredentialField{}, err
 	}
 
 	var result sql.Result
-	if result, err = q.Exec(name, value, credentialId); err != nil {
+	if result, err = s.Exec(name, value, credentialId); err != nil {
 		return CredentialField{}, err
 	}
 
@@ -38,44 +81,16 @@ func AddCredentialField(r *queryrepo.Repository, db *sql.DB, name, value string,
 	}, err
 }
 
-func DeleteCredentialFieldById(r *queryrepo.Repository, db *sql.DB, id int64) (int64, error) {
+func (r *Registry) ListCredentialFields(ctx context.Context) ([]CredentialField, error) {
 	var err error
+	var s *sql.Stmt
 
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "credentialFields", "deleteById"); err != nil {
-		return 0, err
-	}
-
-	var result sql.Result
-	if result, err = q.Exec(id); err != nil {
-		return 0, err
-	}
-
-	return result.RowsAffected()
-}
-
-func GetCredentialFieldById(r *queryrepo.Repository, db *sql.DB, id int64) (CredentialField, error) {
-	var err error
-
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "credentialFields", "getById"); err != nil {
-		return CredentialField{}, err
-	}
-
-	var e CredentialField
-	return e, q.QueryRow(id).Scan(&e.Id, &e.Name, &e.Value, &e.CredentialId)
-}
-
-func ListCredentialFields(r *queryrepo.Repository, db *sql.DB) ([]CredentialField, error) {
-	var err error
-
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "credentialFields", "list"); err != nil {
+	if s, err = r.getStatement(ctx, CredentialFieldsCollection, List); err != nil {
 		return nil, err
 	}
 
 	var rows *sql.Rows
-	if rows, err = q.Query(); err != nil {
+	if rows, err = s.Query(); err != nil {
 		return nil, err
 	}
 	defer rows.Close()
@@ -91,16 +106,16 @@ func ListCredentialFields(r *queryrepo.Repository, db *sql.DB) ([]CredentialFiel
 	return credentialFields, nil
 }
 
-func ListCredentialFieldsByCredentialId(r *queryrepo.Repository, db *sql.DB, id int64) ([]CredentialField, error) {
+func (r *Registry) ListCredentialFieldsByCredentialId(ctx context.Context, id int64) ([]CredentialField, error) {
 	var err error
+	var s *sql.Stmt
 
-	var q *sql.Stmt
-	if q, err = r.DbPrepare(db, "credentialFields", "listByCredentialId"); err != nil {
+	if s, err = r.getStatement(ctx, CredentialFieldsCollection, ListByCredentialId); err != nil {
 		return nil, err
 	}
 
 	var rows *sql.Rows
-	if rows, err = q.Query(id); err != nil {
+	if rows, err = s.Query(id); err != nil {
 		return nil, err
 	}
 	defer rows.Close()
