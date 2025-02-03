@@ -1,3 +1,3 @@
 SELECT *
-FROM tenants
+FROM connection_types
 WHERE name == ?

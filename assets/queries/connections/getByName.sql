@@ -1,3 +1,3 @@
 SELECT *
-FROM environments
+FROM connection_types
 WHERE name == ?

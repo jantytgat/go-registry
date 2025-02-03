@@ -1,3 +1,3 @@
 DELETE
-FROM tenants
+FROM connections
 WHERE name == ?
