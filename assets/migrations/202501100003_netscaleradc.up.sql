@@ -27,5 +27,5 @@ CREATE TABLE IF NOT EXISTS connections_netscaleradc
     validateServerCertificate INTEGER NOT NULL
 );
 
-INSERT INTO connection_types (guid, name)
-VALUES ('0', 'netscaleradc');
+INSERT INTO connection_types (name)
+VALUES ('netscaleradc');

@@ -117,7 +117,6 @@ CREATE TABLE IF NOT EXISTS connection_types
     id   INTEGER NOT NULL
         CONSTRAINT p_id
             PRIMARY KEY AUTOINCREMENT,
-    guid TEXT    NOT NULL,
     name TEXT    NOT NULL
         CONSTRAINT u_name
             UNIQUE
@@ -129,7 +128,10 @@ CREATE TABLE IF NOT EXISTS connections
     id                 INTEGER NOT NULL
         CONSTRAINT p_id
             PRIMARY KEY AUTOINCREMENT,
-    guid               TEXT    NOT NULL,
+    guid TEXT NOT NULL
+        CONSTRAINT u_guid
+            UNIQUE
+                ON CONFLICT FAIL,
     name               TEXT    NOT NULL,
     environment_id     INTEGER NOT NULL
         CONSTRAINT f_environment_id

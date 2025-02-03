@@ -27,5 +27,5 @@ CREATE TABLE IF NOT EXISTS connections_smtp_servers
             ON DELETE RESTRICT
 );
 
-INSERT INTO connection_types (guid, name)
-VALUES ('0', 'smtp');
+INSERT INTO connection_types (name)
+VALUES ('smtp');
