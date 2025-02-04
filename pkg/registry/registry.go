@@ -43,6 +43,7 @@ const (
 	GetByNameAndOrganizationId                   = "getByNameAndOrganizationId"
 	GetByNameAndOrganizationName                 = "getByNameAndOrganizationName"
 	Insert                                       = "insert"
+	InsertWithOrganizationName                   = "insertWithOrganizationName"
 	List                                         = "list"
 	ListByCredentialId                           = "listByCredentialId"
 	ListByOrganizationId                         = "listByOrganizationId"

@@ -149,6 +149,27 @@ func (r *Registry) InsertTenant(ctx context.Context, guid, name string, organiza
 	}, err
 }
 
+func (r *Registry) InsertTenantWithOrganizationName(ctx context.Context, guid, name string, organizationName string) (Tenant, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, TenantsCollection, InsertWithOrganizationName); err != nil {
+		return Tenant{}, err
+	}
+
+	var result sql.Result
+	if result, err = s.ExecContext(ctx, guid, name, organizationName); err != nil {
+		return Tenant{}, err
+	}
+
+	var id int64
+	if id, err = result.LastInsertId(); err != nil {
+		return Tenant{}, err
+	}
+
+	return r.GetTenantById(ctx, id)
+}
+
 func (r *Registry) ListTenants(ctx context.Context) ([]Tenant, error) {
 	var err error
 	var s *sql.Stmt
