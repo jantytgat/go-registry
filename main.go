@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"embed"
 	"errors"
@@ -23,52 +24,64 @@ var migrationFs embed.FS
 //go:embed assets/queries/*
 var queriesFs embed.FS
 
-var db *sql.DB
 var rsql *queryrepo.Repository
 
 func main() {
 	var err error
+	var path = "./registry.db"
+	// var path = ":memory:"
 
-	if err = initializeInMemory(); err != nil {
-		log.Fatal(err)
-	}
-
-	if err = migrateDb(); err != nil {
-		log.Fatal(err)
+	if err = migrateDb(path); err != nil {
+		fmt.Println("Failed to migrate db")
+		panic(err)
 	}
 
 	// Create query repository from embedded files
 	if rsql, err = queryrepo.NewFromFs(queriesFs, "assets/queries"); err != nil {
-		log.Fatal(err)
+		fmt.Println("Failed to load queries")
+		panic(err)
 	}
 
+	var r *registry.Registry
+	if r, err = registry.New(path, rsql); err != nil {
+		fmt.Println("Failed to create registry")
+		panic(err)
+	}
+	if err = r.Open(); err != nil {
+		fmt.Println("Failed to open registry")
+		panic(err)
+	}
+	defer r.Close()
+
+	ctx := context.Background()
+
 	var organization registry.Organization
-	if organization, err = registry.GetOrganizationByGuid(rsql, db, "0"); err != nil {
-		log.Fatal(err)
+	if organization, err = r.GetOrganizationByGuid(ctx, "0"); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		fmt.Println("Failed to get organization", "0")
+		panic(err)
 	}
 	fmt.Println(organization)
 
-	var organization2 registry.Organization
-	if organization2, err = registry.AddOrganization(rsql, db, "1", "corelayer"); err == nil {
-		fmt.Println(organization2)
-	}
-
 	var organizations []registry.Organization
-	if organizations, err = registry.ListOrganizations(rsql, db); err != nil {
-		log.Fatal(err)
+	if organizations, err = r.ListOrganizations(ctx); err != nil {
+		fmt.Println("Failed to list organizations")
+		panic(err)
 	}
 
-	var rowsAffected int64
-	rowsAffected, err = registry.DeleteOrganizationByName(rsql, db, "default")
-	fmt.Println("Delete default org", rowsAffected, err)
-
+	// var rowsAffected int64
+	// if rowsAffected, err = r.DeleteOrganizationByName(ctx, "default"); err != nil {
+	// 	fmt.Println("Failed to delete organization")
+	// 	panic(err)
+	// }
+	// fmt.Println("Delete default org", rowsAffected, err)
+	//
 	fmt.Println("Listing organizations:")
 	for _, o := range organizations {
 		fmt.Println(o)
 	}
 
 	var tenants []registry.Tenant
-	if tenants, err = registry.ListTenants(rsql, db); err != nil {
+	if tenants, err = r.ListTenants(ctx); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Listing tenants:")
@@ -78,26 +91,15 @@ func main() {
 
 }
 
-func initializeInMemory() error {
+func migrateDb(path string) error {
 	var err error
-	db, err = registry.Connect(":memory:")
-	if err != nil {
+
+	var db *sql.DB
+	if db, err = sql.Open("sqlite", path); err != nil {
 		return err
 	}
-	return nil
-}
+	defer db.Close()
 
-func initializeLocal() error {
-	var err error
-	db, err = registry.Connect("./registry.db")
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func migrateDb() error {
-	var err error
 	var src source.Driver
 	if src, err = iofs.New(migrationFs, "assets/migrations"); err != nil {
 		return err
