@@ -1,10 +1,12 @@
 module github.com/jantytgat/go-registry
 
-go 1.23
+go 1.24
+
+toolchain go1.24.0
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.18.2
-	github.com/jantytgat/go-sql-queryrepo v0.1.7
+	github.com/jantytgat/go-sql-queryrepo v0.1.8
 )
 
 require (
@@ -16,10 +18,10 @@ require (
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	go.uber.org/atomic v1.11.0 // indirect
-	golang.org/x/exp v0.0.0-20250128182459-e0ece0dbea4c // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	modernc.org/libc v1.61.11 // indirect
+	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	modernc.org/libc v1.61.13 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.8.2 // indirect
-	modernc.org/sqlite v1.34.5 // indirect
+	modernc.org/sqlite v1.35.0 // indirect
 )
