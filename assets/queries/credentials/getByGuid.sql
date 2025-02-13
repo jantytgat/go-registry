@@ -1,3 +1,3 @@
 SELECT *
-FROM credentials
+FROM environments
 WHERE guid == ?

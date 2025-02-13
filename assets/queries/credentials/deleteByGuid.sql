@@ -1,3 +1,3 @@
 DELETE
-FROM credentials
+FROM environments
 WHERE guid == ?

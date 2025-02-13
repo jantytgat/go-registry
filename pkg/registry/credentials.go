@@ -44,16 +44,32 @@ func (r *Registry) DeleteCredentialById(ctx context.Context, id int64) (int64, e
 	return result.RowsAffected()
 }
 
-func (r *Registry) DeleteCredentialByName(ctx context.Context, name string) (int64, error) {
+func (r *Registry) DeleteCredentialByNameAndTenantId(ctx context.Context, name string, id int64) (int64, error) {
 	var err error
 	var s *sql.Stmt
 
-	if s, err = r.getStatement(ctx, CredentialsCollection, DeleteByName); err != nil {
+	if s, err = r.getStatement(ctx, CredentialsCollection, DeleteByNameAndTenantId); err != nil {
 		return 0, err
 	}
 
 	var result sql.Result
-	if result, err = s.Exec(name); err != nil {
+	if result, err = s.Exec(name, id); err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
+
+func (r *Registry) DeleteCredentialByNameAndTenantNameAndOrganizationName(ctx context.Context, name, tenant, organization string) (int64, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, CredentialsCollection, DeleteByNameAndTenantNameAndOrganizationName); err != nil {
+		return 0, err
+	}
+
+	var result sql.Result
+	if result, err = s.Exec(name, tenant, organization); err != nil {
 		return 0, err
 	}
 
@@ -84,16 +100,28 @@ func (r *Registry) GetCredentialById(ctx context.Context, id int64) (Credential,
 	return e, s.QueryRow(id).Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId)
 }
 
-func (r *Registry) GetCredentialByName(ctx context.Context, name string) (Credential, error) {
+func (r *Registry) GetCredentialByNameAndTenantId(ctx context.Context, name string, id int64) (Credential, error) {
 	var err error
 	var s *sql.Stmt
 
-	if s, err = r.getStatement(ctx, CredentialsCollection, GetByName); err != nil {
+	if s, err = r.getStatement(ctx, CredentialsCollection, GetByNameAndTenantId); err != nil {
 		return Credential{}, err
 	}
 
 	var e Credential
-	return e, s.QueryRow(name).Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId)
+	return e, s.QueryRow(name, id).Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId)
+}
+
+func (r *Registry) GetCredentialByNameAndTenantNameAndOrganizationName(ctx context.Context, name, tenant, organization string) (Credential, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, CredentialsCollection, GetByNameAndTenantId); err != nil {
+		return Credential{}, err
+	}
+
+	var e Credential
+	return e, s.QueryRow(name, tenant, organization).Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId)
 }
 
 func (r *Registry) InsertCredential(ctx context.Context, guid, name string, tenantId int64) (Credential, error) {
@@ -156,6 +184,31 @@ func (r *Registry) ListCredentialsByTenantId(ctx context.Context, id int64) ([]C
 
 	var rows *sql.Rows
 	if rows, err = s.Query(id); err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var credentials []Credential
+	for rows.Next() {
+		var e Credential
+		if err = rows.Scan(&e.Id, &e.Guid, &e.Name, &e.TenantId); err != nil {
+			return nil, err
+		}
+		credentials = append(credentials, e)
+	}
+	return credentials, nil
+}
+
+func (r *Registry) ListCredentialsByTenantNameAndOrganizationName(ctx context.Context, tenant, organization string) ([]Credential, error) {
+	var err error
+	var s *sql.Stmt
+
+	if s, err = r.getStatement(ctx, CredentialsCollection, ListByTenantId); err != nil {
+		return nil, err
+	}
+
+	var rows *sql.Rows
+	if rows, err = s.Query(tenant, organization); err != nil {
 		return nil, err
 	}
 	defer rows.Close()

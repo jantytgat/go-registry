@@ -1,3 +1,3 @@
-INSERT INTO credentials (guid, name, tenant_id)
+INSERT INTO environments (guid, name, tenant_id)
 VALUES (?, ?, ?)
 RETURNING id

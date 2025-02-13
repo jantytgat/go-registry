@@ -1,2 +1,2 @@
 SELECT *
-FROM credentials
+FROM environments
