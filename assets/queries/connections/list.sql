@@ -1,2 +1,2 @@
 SELECT *
-FROM connection_types
+FROM connections

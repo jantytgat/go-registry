@@ -1,3 +1,3 @@
-INSERT INTO connection_types (guid, name)
+INSERT INTO connections (guid, name)
 VALUES (?, ?)
 RETURNING id

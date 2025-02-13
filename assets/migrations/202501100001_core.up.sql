@@ -146,13 +146,13 @@ CREATE TABLE IF NOT EXISTS connections
             UNIQUE
                 ON CONFLICT FAIL,
     name               TEXT    NOT NULL,
-    environment_id     INTEGER NOT NULL
-        CONSTRAINT f_environment_id
-            REFERENCES environments (id),
     connection_type_id INTEGER NOT NULL
         CONSTRAINT f_connection_type_id
             REFERENCES connection_types (id)
             ON DELETE CASCADE,
+    environment_id INTEGER NOT NULL
+        CONSTRAINT f_environment_id
+            REFERENCES environments (id),
 
     CONSTRAINT u_connection_name
         UNIQUE (environment_id, name)
